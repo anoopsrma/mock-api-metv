@@ -1,36 +1,208 @@
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
-// require('dotenv').config();
 const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
-const multer = require('multer'); 
-const sqlite3 = require('sqlite3').verbose();
+const multer = require('multer');
+const { createClient } = require('@libsql/client');
 
 const app = express();
 const port = 3000;
 
-// Allow JSON response
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 const upload = multer();
 
+// JWT Secret (use env var in production)
 const JWT_SECRET = 'your_jwt_secret_key';
 
-const db = new sqlite3.Database('database.db', (err) => {
-    if (err) return console.error(err.message);
-    console.log('Connected to SQLite database.');
+// Create Turso client
+const db = createClient({
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Create Users table
-db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT
-    token TEXT DEFAULT NULL
-)`);
+// Create users table
+async function createUserTable() {
+    await db.execute(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      token TEXT DEFAULT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+    console.log('User table ready');
+}
 
-// Mock endpoint
+// Register user
+app.post('/api/v1/register', upload.none(), async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password)
+        return res.status(400).json({ status: false, error: 'Missing fields' });
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.execute({
+            sql: `INSERT INTO users (username, password) VALUES (?, ?)`,
+            args: [username, hashedPassword],
+        });
+
+        return res.status(201).json({
+            status: true,
+            message: 'User registered successfully.',
+        });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) {
+            return res.status(409).json({
+                status: false,
+                error: 'User already exists!',
+            });
+        }
+        console.error('❌ Error:', err.message);
+        return res.status(500).json({
+            status: false,
+            error: 'Internal server error',
+        });
+    }
+});
+
+// Login
+app.post('/api/v1/login', upload.none(), async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password)
+        return res.status(400).json({ status: false, error: 'Missing credentials' });
+
+    try {
+        // Fetch user from DB
+        const result = await db.execute({
+            sql: `SELECT * FROM users WHERE username = ?`,
+            args: [username],
+        });
+
+        const user = result.rows[0];
+
+        if (!user)
+            return res.status(401).json({ status: false, error: 'Invalid username or password' });
+
+        // Compare passwords
+        const match = await bcrypt.compare(password, user.password);
+        if (!match)
+            return res.status(401).json({ status: false, error: 'Invalid username or password' });
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            JWT_SECRET,
+            { expiresIn: '2h' }
+        );
+
+        // Store token in DB (optional)
+        await db.execute({
+            sql: `UPDATE users SET token = ? WHERE id = ?`,
+            args: [token, user.id],
+        });
+
+        return res.status(200).json({
+            status: true,
+            data: {
+                "access_token": token
+            }
+        });
+
+    } catch (err) {
+        console.error('❌ Login error:', err.message);
+        return res.status(500).json({ status: false, error: 'Server error' });
+    }
+});
+
+// Forgot Password
+app.post('/api/v1/password/forgot', upload.none(), async (req, res) => {
+    const { username } = req.body;
+    try {
+        const result = await db.execute({
+            sql: `SELECT * FROM users WHERE username = ?`,
+            args: [username],
+        });
+
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                error: 'User not found!',
+            });
+        }
+        // Generate and store reset token
+        const resetToken = Math.floor(100000 + Math.random() * 900000).toString(); // e.g., "123456"
+        await db.execute({
+            sql: `UPDATE users SET token = ? WHERE username = ?`,
+            args: [resetToken, username],
+        });
+        // Simulate sending token
+        console.log(`🔐 Reset token for ${username}: ${resetToken}`);
+        res.status(200).json({
+            status: true,
+            message: 'Password reset code has been sent (simulated)',
+        });
+    } catch (err) {
+        console.error('❌ Forgot password error:', err.message);
+        res.status(500).json({
+            status: false,
+            error: 'Internal server error',
+        });
+    }
+});
+
+
+app.post('/api/v1/password/reset', upload.none(), async (req, res) => {
+    const { username, token, new_password } = req.body;
+
+    try {
+        const result = await db.execute({
+            sql: `SELECT * FROM users WHERE username = ?`,
+            args: [username],
+        });
+
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                error: 'User not found!',
+            });
+        }
+        console.log(token)
+        if (!user.token || token !== "123456") {
+            return res.status(422).json({
+                status: false,
+                error: 'Invalid or expired reset token',
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        // Update password and clear token
+        await db.execute({
+            sql: `UPDATE users SET password = ?, token = NULL WHERE username = ?`,
+            args: [hashedPassword, username],
+        });
+
+        res.status(200).json({
+            status: true,
+            message: 'Password has been reset successfully',
+        });
+    } catch (err) {
+        console.error('❌ Reset password error:', err.message);
+        res.status(500).json({
+            status: false,
+            error: 'Internal server error',
+        });
+    }
+});
+
 app.get('/api/v1/config', (req, res) => {
     res.json({
         status: true,
@@ -42,16 +214,24 @@ app.get('/api/v1/config', (req, res) => {
                 label: "Forgot Password",
                 route: "/api/v1/password/forgot",
                 form: [
-                    { label: "Email", key: "username", data_type: "string" },
+                    {
+                        label: "Email", key: "username", data_type: "string"
+                    },
                 ]
             },
             reset_password: {
                 label: "Reset Password",
                 route: "/api/v1/password/reset",
                 form: [
-                    { label: "Email", key: "username", data_type: "string" },
-                    { label: "Password", key: "new_password", data_type: "string" },
-                    { label: "Token", key: "token", data_type: "string" },
+                    {
+                        label: "Email", key: "username", data_type: "string"
+                    },
+                    {
+                        label: "Password", key: "new_password", data_type: "string"
+                    },
+                    {
+                        label: "Token", key: "token", data_type: "string"
+                    },
                 ]
             },
             login: [
@@ -61,8 +241,12 @@ app.get('/api/v1/config', (req, res) => {
                     data_type: "auth",
                     route: "/api/v1/login",
                     form: [
-                        { label: "Username", key: "username", data_type: "string" },
-                        { label: "Password", key: "password", data_type: "string" },
+                        {
+                            label: "Username", key: "username", data_type: "string"
+                        },
+                        {
+                            label: "Password", key: "password", data_type: "string"
+                        },
                     ],
                 },
                 {
@@ -83,133 +267,38 @@ app.get('/api/v1/config', (req, res) => {
             register: {
                 "route": "api/v1/register",
                 "form": [
-                    { label: "First Name", key: "first_name", data_type: "string" },
-                    { label: "Last Name", key: "last_name", data_type: "string" },
-                    { label: "Email", key: "email", data_type: "string" },
-                    { label: "Password", key: "password", data_type: "string" },
-                    { label: "Confirm Password", key: "confirm_password", data_type: "string" },
-                    { label: "Phone Number", key: "phone", data_type: "string" },
+                    {
+                        label: "First Name", key: "first_name", data_type: "string"
+                    },
+                    {
+                        label: "Last Name", key: "last_name", data_type: "string"
+                    },
+                    {
+                        label: "Email", key: "email", data_type: "string"
+                    },
+                    {
+                        label: "Password", key: "password", data_type: "string"
+                    },
+                    {
+                        label: "Confirm Password", key: "confirm_password", data_type: "string"
+                    },
+                    {
+                        label: "Phone Number", key: "phone", data_type: "string"
+                    },
                     {
                         label: "Gender",
                         key: "gender",
                         data_type: "enum",
-                        options: ["Male", "Female", "Other"]
+                        options: [
+                            "Male",
+                            "Female",
+                            "Other"
+                        ]
                     }
                 ]
             }
         }
     });
-});
-
-const users = [];
-const passwordResetTokens = {};
-
-//Register
-app.post('/api/v1/register', async (req, res) => {
-    const { username, password } = req.body;
-    db.run(
-        `INSERT INTO users (username, password) VALUES (?, ?)`,
-        [username, password],
-        function (err) {
-            if (err) {
-                if (err.message.includes("UNIQUE")) {
-                    return res.status(409).json({
-                        "status": false,
-                        "error": 'User already exists!'
-                    });
-                }
-                return res.status(500).json({
-                    "status": false,
-                    "error": 'Error creating user!'
-                });
-            }
-            res.status(201).json({
-                "status": true,
-                "message": 'User registered successfully.'
-            });
-        }
-      );
-});
-
-app.post('/api/v1/password/forgot', (req, res) => {
-    const { username } = req.body;
-    const user = db.get('SELECT * FROM users WHERE username = ?', username);
-
-    if (!user) {
-        return res.status(404).json({
-            status: false,
-            error: 'User not found!'
-        });
-    }
-    const code = "123456";
-    // db.run(
-    //     'UPDATE users SET token = ? WHERE username = ?',
-    //     code,
-    //     username
-    // );
-
-    res.status(200).json({
-        status: true,
-        message: 'Password reset code has been sent (simulated)'
-    });
-});
-
-
-app.post('/api/v1/password/reset', async (req, res) => {
-    const { username, token, new_password } = req.body;
-    const user = db.get('SELECT * FROM users WHERE username = ?', username);
-    if (!user) {
-        return res.status(404).json({
-            status: false,
-            error: 'User not found!'
-        });
-    }
-
-    // if (!user.token || user.token !== token) {
-    //     return res.status(422).json({
-    //         status: false,
-    //         error: 'Invalid or expired reset token'
-    //     });
-    // }
-    // Hash and update the password
-    const hashedPassword = await bcrypt.hash(new_password, 10);
-    await db.run(
-        'UPDATE users SET password = ? WHERE username = ?',
-        hashedPassword,
-        username
-    );
-    res.status(200).json({
-        status: true,
-        message: 'Password has been reset successfully (simulated)'
-    });
-});
-
-
-// Login
-app.post('/api/v1/login', upload.none(), async (req, res) => {
-    const { username, password } = req.body;
-
-    db.get(
-        `SELECT * FROM users WHERE username = ? AND password = ?`,
-        [username, password],
-        (err, row) => {
-            if (err) {
-                if (!user) {
-                    return res.status(401).json({
-                        "status": false,
-                        "error": 'Invalid credentials'
-                    });
-                }
-            }
-            const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
-            res.status(200).json({
-                status: true,
-                data: {
-                    "access_token": token
-                }
-            });
-        }
-    );
 });
 
 // Home
@@ -230,7 +319,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": true,
                             "route": "api/v1/movies/f47ac10b-58cc-4372-a567-0e02b2c3d479/stream",
-                            "genres": ["Action", "Adventure"],
+                            "genres": [
+                                "Action",
+                                "Adventure"
+                            ],
                             "epg": "api/v1/epgs/f47ac10b-58cc-4372-a567-0e02b2c3d479"
                         }
                     ]
@@ -245,7 +337,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Explore the icy habitats of polar regions and the species that survive there.",
                             "start": "2025-09-12T00:00:00Z",
                             "end": "2025-09-12T01:00:00Z",
-                            "genres": ["Nature", "Documentary"],
+                            "genres": [
+                                "Nature",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -255,7 +350,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Go behind the scenes at one of the largest zoos in the world.",
                             "start": "2025-09-12T01:00:00Z",
                             "end": "2025-09-12T02:00:00Z",
-                            "genres": ["Animal", "Reality"],
+                            "genres": [
+                                "Animal",
+                                "Reality"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -265,7 +363,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Discover how modern marvels are constructed from start to finish.",
                             "start": "2025-09-12T02:00:00Z",
                             "end": "2025-09-12T03:00:00Z",
-                            "genres": ["Science", "Engineering"],
+                            "genres": [
+                                "Science",
+                                "Engineering"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -275,7 +376,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Follow rescue teams helping injured or endangered wild animals.",
                             "start": "2025-09-12T03:00:00Z",
                             "end": "2025-09-12T04:00:00Z",
-                            "genres": ["Wildlife", "Rescue"],
+                            "genres": [
+                                "Wildlife",
+                                "Rescue"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -285,7 +389,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "A look inside the world's most advanced production facilities.",
                             "start": "2025-09-12T04:00:00Z",
                             "end": "2025-09-12T05:00:00Z",
-                            "genres": ["Technology", "Industry"],
+                            "genres": [
+                                "Technology",
+                                "Industry"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -295,7 +402,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Explore the causes of major aviation disasters.",
                             "start": "2025-09-12T05:00:00Z",
                             "end": "2025-09-12T06:00:00Z",
-                            "genres": ["Investigation", "Documentary"],
+                            "genres": [
+                                "Investigation",
+                                "Documentary"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -305,7 +415,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Real stories of people caught smuggling drugs or breaking laws overseas.",
                             "start": "2025-09-12T06:00:00Z",
                             "end": "2025-09-12T07:00:00Z",
-                            "genres": ["Crime", "Drama"],
+                            "genres": [
+                                "Crime",
+                                "Drama"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -315,7 +428,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Adventures from the frontiers of science and discovery.",
                             "start": "2025-09-12T07:00:00Z",
                             "end": "2025-09-12T08:00:00Z",
-                            "genres": ["Adventure", "Science"],
+                            "genres": [
+                                "Adventure",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -325,7 +441,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Mind-bending challenges that explore the brain’s inner workings.",
                             "start": "2025-09-12T08:00:00Z",
                             "end": "2025-09-12T09:00:00Z",
-                            "genres": ["Science", "Education"],
+                            "genres": [
+                                "Science",
+                                "Education"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -335,7 +454,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "A journey through the universe and the laws of nature.",
                             "start": "2025-09-12T09:00:00Z",
                             "end": "2025-09-12T10:00:00Z",
-                            "genres": ["Science", "Space"],
+                            "genres": [
+                                "Science",
+                                "Space"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -345,7 +467,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Survival experts take celebrities into the wild.",
                             "start": "2025-09-12T10:00:00Z",
                             "end": "2025-09-12T11:00:00Z",
-                            "genres": ["Adventure", "Reality"],
+                            "genres": [
+                                "Adventure",
+                                "Reality"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -355,7 +480,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Nature’s most aggressive battles between animals.",
                             "start": "2025-09-12T11:00:00Z",
                             "end": "2025-09-12T12:00:00Z",
-                            "genres": ["Wildlife", "Action"],
+                            "genres": [
+                                "Wildlife",
+                                "Action"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -365,7 +493,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "3D scanning reveals secrets hidden beneath the oceans.",
                             "start": "2025-09-12T12:00:00Z",
                             "end": "2025-09-12T13:00:00Z",
-                            "genres": ["Science", "Marine"],
+                            "genres": [
+                                "Science",
+                                "Marine"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -375,7 +506,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Explore ancient ruins and civilizations with modern technology.",
                             "start": "2025-09-12T13:00:00Z",
                             "end": "2025-09-12T14:00:00Z",
-                            "genres": ["History", "Archaeology"],
+                            "genres": [
+                                "History",
+                                "Archaeology"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -385,7 +519,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Inside Elon Musk's plan to colonize Mars.",
                             "start": "2025-09-12T14:00:00Z",
                             "end": "2025-09-12T15:00:00Z",
-                            "genres": ["Science", "Technology"],
+                            "genres": [
+                                "Science",
+                                "Technology"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -395,7 +532,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Behind the scenes of one of the world's busiest airports.",
                             "start": "2025-09-12T15:00:00Z",
                             "end": "2025-09-12T16:00:00Z",
-                            "genres": ["Reality", "Travel"],
+                            "genres": [
+                                "Reality",
+                                "Travel"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -405,7 +545,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Exploring Hitler’s massive military infrastructure.",
                             "start": "2025-09-12T16:00:00Z",
                             "end": "2025-09-12T17:00:00Z",
-                            "genres": ["History", "War"],
+                            "genres": [
+                                "History",
+                                "War"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -415,7 +558,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Docudrama about deadly virus outbreaks.",
                             "start": "2025-09-12T17:00:00Z",
                             "end": "2025-09-12T18:00:00Z",
-                            "genres": ["Drama", "Science"],
+                            "genres": [
+                                "Drama",
+                                "Science"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -425,7 +571,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "A blend of drama and documentary about the future of Mars exploration.",
                             "start": "2025-09-12T18:00:00Z",
                             "end": "2025-09-12T19:00:00Z",
-                            "genres": ["Science Fiction", "Space"],
+                            "genres": [
+                                "Science Fiction",
+                                "Space"
+                            ],
                             "rating": "TV-PG",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -435,7 +584,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Exploring different cultures’ views on God and spirituality.",
                             "start": "2025-09-12T19:00:00Z",
                             "end": "2025-09-12T20:00:00Z",
-                            "genres": ["Religion", "Documentary"],
+                            "genres": [
+                                "Religion",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -445,7 +597,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Funny fails with a scientific explanation.",
                             "start": "2025-09-12T20:00:00Z",
                             "end": "2025-09-12T21:00:00Z",
-                            "genres": ["Comedy", "Science"],
+                            "genres": [
+                                "Comedy",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -455,7 +610,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Witness the planet’s greatest animal migrations.",
                             "start": "2025-09-12T21:00:00Z",
                             "end": "2025-09-12T22:00:00Z",
-                            "genres": ["Nature", "Wildlife"],
+                            "genres": [
+                                "Nature",
+                                "Wildlife"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -465,7 +623,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "Uncovering the mysteries of the deep ocean.",
                             "start": "2025-09-12T22:00:00Z",
                             "end": "2025-09-12T23:00:00Z",
-                            "genres": ["Marine", "Science"],
+                            "genres": [
+                                "Marine",
+                                "Science"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -475,7 +636,10 @@ app.get('/api/v1/home', (req, res) => {
                             "description": "The science and predictions of future large earthquakes.",
                             "start": "2025-09-12T23:00:00Z",
                             "end": "2025-09-13T00:00:00Z",
-                            "genres": ["Science", "Disaster"],
+                            "genres": [
+                                "Science",
+                                "Disaster"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         }
@@ -493,7 +657,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428888-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Adventure"],
+                            "genres": [
+                                "Action",
+                                "Adventure"
+                            ],
                             "epg": ""
                         },
                         {
@@ -504,7 +671,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2022,
                             "is_live": false,
                             "route": "api/v1/movies/d9428889-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Sci-Fi"],
+                            "genres": [
+                                "Action",
+                                "Sci-Fi"
+                            ],
                             "epg": ""
                         },
                         {
@@ -515,7 +685,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428890-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Comedy", "Adventure"],
+                            "genres": [
+                                "Comedy",
+                                "Adventure"
+                            ],
                             "epg": ""
                         },
                         {
@@ -526,7 +699,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428891-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Drama", "History"],
+                            "genres": [
+                                "Drama",
+                                "History"
+                            ],
                             "epg": ""
                         },
                         {
@@ -537,7 +713,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428892-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Sci-Fi"],
+                            "genres": [
+                                "Action",
+                                "Sci-Fi"
+                            ],
                             "epg": ""
                         }
                     ]
@@ -554,7 +733,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2024,
                             "is_live": false,
                             "route": "api/v1/movies/d9428893-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Sci-Fi", "Adventure"],
+                            "genres": [
+                                "Sci-Fi",
+                                "Adventure"
+                            ],
                             "epg": ""
                         },
                         {
@@ -565,7 +747,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428894-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Thriller"],
+                            "genres": [
+                                "Action",
+                                "Thriller"
+                            ],
                             "epg": ""
                         },
                         {
@@ -576,7 +761,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428895-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Animation"],
+                            "genres": [
+                                "Action",
+                                "Animation"
+                            ],
                             "epg": ""
                         },
                         {
@@ -587,7 +775,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428896-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Adventure"],
+                            "genres": [
+                                "Action",
+                                "Adventure"
+                            ],
                             "epg": ""
                         },
                         {
@@ -598,7 +789,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2023,
                             "is_live": false,
                             "route": "api/v1/movies/d9428897-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Adventure", "Action"],
+                            "genres": [
+                                "Adventure",
+                                "Action"
+                            ],
                             "epg": ""
                         }
                     ]
@@ -615,7 +809,9 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 1994,
                             "is_live": false,
                             "route": "api/v1/movies/d9428898-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Drama"],
+                            "genres": [
+                                "Drama"
+                            ],
                             "epg": ""
                         },
                         {
@@ -626,7 +822,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 1972,
                             "is_live": false,
                             "route": "api/v1/movies/d9428899-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Crime", "Drama"],
+                            "genres": [
+                                "Crime",
+                                "Drama"
+                            ],
                             "epg": ""
                         },
                         {
@@ -637,7 +836,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2008,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a0-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Crime"],
+                            "genres": [
+                                "Action",
+                                "Crime"
+                            ],
                             "epg": ""
                         },
                         {
@@ -648,7 +850,9 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 1957,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a1-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Drama"],
+                            "genres": [
+                                "Drama"
+                            ],
                             "epg": ""
                         },
                         {
@@ -659,7 +863,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 1993,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a2-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["History", "Drama"],
+                            "genres": [
+                                "History",
+                                "Drama"
+                            ],
                             "epg": ""
                         }
                     ]
@@ -676,7 +883,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2010,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a3-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Action", "Sci-Fi"],
+                            "genres": [
+                                "Action",
+                                "Sci-Fi"
+                            ],
                             "epg": ""
                         },
                         {
@@ -687,7 +897,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2019,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a4-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Thriller", "Drama"],
+                            "genres": [
+                                "Thriller",
+                                "Drama"
+                            ],
                             "epg": ""
                         },
                         {
@@ -698,7 +911,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2014,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a5-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Sci-Fi", "Adventure"],
+                            "genres": [
+                                "Sci-Fi",
+                                "Adventure"
+                            ],
                             "epg": ""
                         },
                         {
@@ -709,7 +925,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2014,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a6-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Drama", "Music"],
+                            "genres": [
+                                "Drama",
+                                "Music"
+                            ],
                             "epg": ""
                         },
                         {
@@ -720,7 +939,10 @@ app.get('/api/v1/home', (req, res) => {
                             "release_year": 2006,
                             "is_live": false,
                             "route": "api/v1/movies/d94288a7-122b-11e1-b85c-61cd3cbb3210",
-                            "genres": ["Drama", "Mystery"],
+                            "genres": [
+                                "Drama",
+                                "Mystery"
+                            ],
                             "epg": ""
                         }
                     ]
@@ -783,7 +1005,8 @@ app.get('/api/v1/home', (req, res) => {
 
 // Stream
 app.get('/api/v1/movies/:channelId/stream', (req, res) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['authorization'
+    ];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({
@@ -812,7 +1035,10 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "release_year": 2023,
                     "is_live": false,
                     "route": "api/v1/movies/d9428888-122b-11e1-b85c-61cd3cbb3210",
-                    "genres": ["Action", "Adventure"],
+                    "genres": [
+                        "Action",
+                        "Adventure"
+                    ],
                     "epg": ""
                 },
                 {
@@ -823,7 +1049,10 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "release_year": 2022,
                     "is_live": false,
                     "route": "api/v1/movies/d9428889-122b-11e1-b85c-61cd3cbb3210",
-                    "genres": ["Action", "Sci-Fi"],
+                    "genres": [
+                        "Action",
+                        "Sci-Fi"
+                    ],
                     "epg": ""
                 },
                 {
@@ -834,7 +1063,10 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "release_year": 2023,
                     "is_live": false,
                     "route": "api/v1/movies/d9428890-122b-11e1-b85c-61cd3cbb3210",
-                    "genres": ["Comedy", "Adventure"],
+                    "genres": [
+                        "Comedy",
+                        "Adventure"
+                    ],
                     "epg": ""
                 },
                 {
@@ -845,7 +1077,10 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "release_year": 2023,
                     "is_live": false,
                     "route": "api/v1/movies/d9428891-122b-11e1-b85c-61cd3cbb3210",
-                    "genres": ["Drama", "History"],
+                    "genres": [
+                        "Drama",
+                        "History"
+                    ],
                     "epg": ""
                 },
                 {
@@ -856,7 +1091,10 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "release_year": 2023,
                     "is_live": false,
                     "route": "api/v1/movies/d9428892-122b-11e1-b85c-61cd3cbb3210",
-                    "genres": ["Action", "Sci-Fi"],
+                    "genres": [
+                        "Action",
+                        "Sci-Fi"
+                    ],
                     "epg": ""
                 }
             ]
@@ -885,7 +1123,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore the icy habitats of polar regions and the species that survive there.",
                             "start": "2025-09-12T00:00:00Z",
                             "end": "2025-09-12T01:00:00Z",
-                            "genres": ["Nature", "Documentary"],
+                            "genres": [
+                                "Nature",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -895,7 +1136,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Go behind the scenes at one of the largest zoos in the world.",
                             "start": "2025-09-12T01:00:00Z",
                             "end": "2025-09-12T02:00:00Z",
-                            "genres": ["Animal", "Reality"],
+                            "genres": [
+                                "Animal",
+                                "Reality"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -905,7 +1149,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Discover how modern marvels are constructed from start to finish.",
                             "start": "2025-09-12T02:00:00Z",
                             "end": "2025-09-12T03:00:00Z",
-                            "genres": ["Science", "Engineering"],
+                            "genres": [
+                                "Science",
+                                "Engineering"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -915,7 +1162,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Follow rescue teams helping injured or endangered wild animals.",
                             "start": "2025-09-12T03:00:00Z",
                             "end": "2025-09-12T04:00:00Z",
-                            "genres": ["Wildlife", "Rescue"],
+                            "genres": [
+                                "Wildlife",
+                                "Rescue"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -925,7 +1175,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A look inside the world's most advanced production facilities.",
                             "start": "2025-09-12T04:00:00Z",
                             "end": "2025-09-12T05:00:00Z",
-                            "genres": ["Technology", "Industry"],
+                            "genres": [
+                                "Technology",
+                                "Industry"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -935,7 +1188,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore the causes of major aviation disasters.",
                             "start": "2025-09-12T05:00:00Z",
                             "end": "2025-09-12T06:00:00Z",
-                            "genres": ["Investigation", "Documentary"],
+                            "genres": [
+                                "Investigation",
+                                "Documentary"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -945,7 +1201,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Real stories of people caught smuggling drugs or breaking laws overseas.",
                             "start": "2025-09-12T06:00:00Z",
                             "end": "2025-09-12T07:00:00Z",
-                            "genres": ["Crime", "Drama"],
+                            "genres": [
+                                "Crime",
+                                "Drama"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -955,7 +1214,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Adventures from the frontiers of science and discovery.",
                             "start": "2025-09-12T07:00:00Z",
                             "end": "2025-09-12T08:00:00Z",
-                            "genres": ["Adventure", "Science"],
+                            "genres": [
+                                "Adventure",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -965,7 +1227,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Mind-bending challenges that explore the brain’s inner workings.",
                             "start": "2025-09-12T08:00:00Z",
                             "end": "2025-09-12T09:00:00Z",
-                            "genres": ["Science", "Education"],
+                            "genres": [
+                                "Science",
+                                "Education"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -975,7 +1240,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A journey through the universe and the laws of nature.",
                             "start": "2025-09-12T09:00:00Z",
                             "end": "2025-09-12T10:00:00Z",
-                            "genres": ["Science", "Space"],
+                            "genres": [
+                                "Science",
+                                "Space"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -985,7 +1253,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Survival experts take celebrities into the wild.",
                             "start": "2025-09-12T10:00:00Z",
                             "end": "2025-09-12T11:00:00Z",
-                            "genres": ["Adventure", "Reality"],
+                            "genres": [
+                                "Adventure",
+                                "Reality"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -995,7 +1266,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Nature’s most aggressive battles between animals.",
                             "start": "2025-09-12T11:00:00Z",
                             "end": "2025-09-12T12:00:00Z",
-                            "genres": ["Wildlife", "Action"],
+                            "genres": [
+                                "Wildlife",
+                                "Action"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1005,7 +1279,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "3D scanning reveals secrets hidden beneath the oceans.",
                             "start": "2025-09-12T12:00:00Z",
                             "end": "2025-09-12T13:00:00Z",
-                            "genres": ["Science", "Marine"],
+                            "genres": [
+                                "Science",
+                                "Marine"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1015,7 +1292,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore ancient ruins and civilizations with modern technology.",
                             "start": "2025-09-12T13:00:00Z",
                             "end": "2025-09-12T14:00:00Z",
-                            "genres": ["History", "Archaeology"],
+                            "genres": [
+                                "History",
+                                "Archaeology"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1025,7 +1305,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Inside Elon Musk's plan to colonize Mars.",
                             "start": "2025-09-12T14:00:00Z",
                             "end": "2025-09-12T15:00:00Z",
-                            "genres": ["Science", "Technology"],
+                            "genres": [
+                                "Science",
+                                "Technology"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1035,7 +1318,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Behind the scenes of one of the world's busiest airports.",
                             "start": "2025-09-12T15:00:00Z",
                             "end": "2025-09-12T16:00:00Z",
-                            "genres": ["Reality", "Travel"],
+                            "genres": [
+                                "Reality",
+                                "Travel"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1045,7 +1331,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Exploring Hitler’s massive military infrastructure.",
                             "start": "2025-09-12T16:00:00Z",
                             "end": "2025-09-12T17:00:00Z",
-                            "genres": ["History", "War"],
+                            "genres": [
+                                "History",
+                                "War"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1055,7 +1344,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Docudrama about deadly virus outbreaks.",
                             "start": "2025-09-12T17:00:00Z",
                             "end": "2025-09-12T18:00:00Z",
-                            "genres": ["Drama", "Science"],
+                            "genres": [
+                                "Drama",
+                                "Science"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1065,7 +1357,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A blend of drama and documentary about the future of Mars exploration.",
                             "start": "2025-09-12T18:00:00Z",
                             "end": "2025-09-12T19:00:00Z",
-                            "genres": ["Science Fiction", "Space"],
+                            "genres": [
+                                "Science Fiction",
+                                "Space"
+                            ],
                             "rating": "TV-PG",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1075,7 +1370,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Exploring different cultures’ views on God and spirituality.",
                             "start": "2025-09-12T19:00:00Z",
                             "end": "2025-09-12T20:00:00Z",
-                            "genres": ["Religion", "Documentary"],
+                            "genres": [
+                                "Religion",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1085,7 +1383,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Funny fails with a scientific explanation.",
                             "start": "2025-09-12T20:00:00Z",
                             "end": "2025-09-12T21:00:00Z",
-                            "genres": ["Comedy", "Science"],
+                            "genres": [
+                                "Comedy",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1095,7 +1396,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Witness the planet’s greatest animal migrations.",
                             "start": "2025-09-12T21:00:00Z",
                             "end": "2025-09-12T22:00:00Z",
-                            "genres": ["Nature", "Wildlife"],
+                            "genres": [
+                                "Nature",
+                                "Wildlife"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1105,7 +1409,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Uncovering the mysteries of the deep ocean.",
                             "start": "2025-09-12T22:00:00Z",
                             "end": "2025-09-12T23:00:00Z",
-                            "genres": ["Marine", "Science"],
+                            "genres": [
+                                "Marine",
+                                "Science"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1115,7 +1422,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "The science and predictions of future large earthquakes.",
                             "start": "2025-09-12T23:00:00Z",
                             "end": "2025-09-13T00:00:00Z",
-                            "genres": ["Science", "Disaster"],
+                            "genres": [
+                                "Science",
+                                "Disaster"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         }
@@ -1136,7 +1446,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore the icy habitats of polar regions and the species that survive there.",
                             "start": "2025-09-12T00:00:00Z",
                             "end": "2025-09-12T01:00:00Z",
-                            "genres": ["Nature", "Documentary"],
+                            "genres": [
+                                "Nature",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1146,7 +1459,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Go behind the scenes at one of the largest zoos in the world.",
                             "start": "2025-09-12T01:00:00Z",
                             "end": "2025-09-12T02:00:00Z",
-                            "genres": ["Animal", "Reality"],
+                            "genres": [
+                                "Animal",
+                                "Reality"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1156,7 +1472,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Discover how modern marvels are constructed from start to finish.",
                             "start": "2025-09-12T02:00:00Z",
                             "end": "2025-09-12T03:00:00Z",
-                            "genres": ["Science", "Engineering"],
+                            "genres": [
+                                "Science",
+                                "Engineering"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1166,7 +1485,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Follow rescue teams helping injured or endangered wild animals.",
                             "start": "2025-09-12T03:00:00Z",
                             "end": "2025-09-12T04:00:00Z",
-                            "genres": ["Wildlife", "Rescue"],
+                            "genres": [
+                                "Wildlife",
+                                "Rescue"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1176,7 +1498,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A look inside the world's most advanced production facilities.",
                             "start": "2025-09-12T04:00:00Z",
                             "end": "2025-09-12T05:00:00Z",
-                            "genres": ["Technology", "Industry"],
+                            "genres": [
+                                "Technology",
+                                "Industry"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1186,7 +1511,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore the causes of major aviation disasters.",
                             "start": "2025-09-12T05:00:00Z",
                             "end": "2025-09-12T06:00:00Z",
-                            "genres": ["Investigation", "Documentary"],
+                            "genres": [
+                                "Investigation",
+                                "Documentary"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1196,7 +1524,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Real stories of people caught smuggling drugs or breaking laws overseas.",
                             "start": "2025-09-12T06:00:00Z",
                             "end": "2025-09-12T07:00:00Z",
-                            "genres": ["Crime", "Drama"],
+                            "genres": [
+                                "Crime",
+                                "Drama"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1206,7 +1537,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Adventures from the frontiers of science and discovery.",
                             "start": "2025-09-12T07:00:00Z",
                             "end": "2025-09-12T08:00:00Z",
-                            "genres": ["Adventure", "Science"],
+                            "genres": [
+                                "Adventure",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1216,7 +1550,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Mind-bending challenges that explore the brain’s inner workings.",
                             "start": "2025-09-12T08:00:00Z",
                             "end": "2025-09-12T09:00:00Z",
-                            "genres": ["Science", "Education"],
+                            "genres": [
+                                "Science",
+                                "Education"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1226,7 +1563,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A journey through the universe and the laws of nature.",
                             "start": "2025-09-12T09:00:00Z",
                             "end": "2025-09-12T10:00:00Z",
-                            "genres": ["Science", "Space"],
+                            "genres": [
+                                "Science",
+                                "Space"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1236,7 +1576,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Survival experts take celebrities into the wild.",
                             "start": "2025-09-12T10:00:00Z",
                             "end": "2025-09-12T11:00:00Z",
-                            "genres": ["Adventure", "Reality"],
+                            "genres": [
+                                "Adventure",
+                                "Reality"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1246,7 +1589,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Nature’s most aggressive battles between animals.",
                             "start": "2025-09-12T11:00:00Z",
                             "end": "2025-09-12T12:00:00Z",
-                            "genres": ["Wildlife", "Action"],
+                            "genres": [
+                                "Wildlife",
+                                "Action"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1256,7 +1602,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "3D scanning reveals secrets hidden beneath the oceans.",
                             "start": "2025-09-12T12:00:00Z",
                             "end": "2025-09-12T13:00:00Z",
-                            "genres": ["Science", "Marine"],
+                            "genres": [
+                                "Science",
+                                "Marine"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1266,7 +1615,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Explore ancient ruins and civilizations with modern technology.",
                             "start": "2025-09-12T13:00:00Z",
                             "end": "2025-09-12T14:00:00Z",
-                            "genres": ["History", "Archaeology"],
+                            "genres": [
+                                "History",
+                                "Archaeology"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1276,7 +1628,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Inside Elon Musk's plan to colonize Mars.",
                             "start": "2025-09-12T14:00:00Z",
                             "end": "2025-09-12T15:00:00Z",
-                            "genres": ["Science", "Technology"],
+                            "genres": [
+                                "Science",
+                                "Technology"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1286,7 +1641,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Behind the scenes of one of the world's busiest airports.",
                             "start": "2025-09-12T15:00:00Z",
                             "end": "2025-09-12T16:00:00Z",
-                            "genres": ["Reality", "Travel"],
+                            "genres": [
+                                "Reality",
+                                "Travel"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1296,7 +1654,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Exploring Hitler’s massive military infrastructure.",
                             "start": "2025-09-12T16:00:00Z",
                             "end": "2025-09-12T17:00:00Z",
-                            "genres": ["History", "War"],
+                            "genres": [
+                                "History",
+                                "War"
+                            ],
                             "rating": "PG-13",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1306,7 +1667,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Docudrama about deadly virus outbreaks.",
                             "start": "2025-09-12T17:00:00Z",
                             "end": "2025-09-12T18:00:00Z",
-                            "genres": ["Drama", "Science"],
+                            "genres": [
+                                "Drama",
+                                "Science"
+                            ],
                             "rating": "TV-14",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1316,7 +1680,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "A blend of drama and documentary about the future of Mars exploration.",
                             "start": "2025-09-12T18:00:00Z",
                             "end": "2025-09-12T19:00:00Z",
-                            "genres": ["Science Fiction", "Space"],
+                            "genres": [
+                                "Science Fiction",
+                                "Space"
+                            ],
                             "rating": "TV-PG",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1326,7 +1693,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Exploring different cultures’ views on God and spirituality.",
                             "start": "2025-09-12T19:00:00Z",
                             "end": "2025-09-12T20:00:00Z",
-                            "genres": ["Religion", "Documentary"],
+                            "genres": [
+                                "Religion",
+                                "Documentary"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1336,7 +1706,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Funny fails with a scientific explanation.",
                             "start": "2025-09-12T20:00:00Z",
                             "end": "2025-09-12T21:00:00Z",
-                            "genres": ["Comedy", "Science"],
+                            "genres": [
+                                "Comedy",
+                                "Science"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1346,7 +1719,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Witness the planet’s greatest animal migrations.",
                             "start": "2025-09-12T21:00:00Z",
                             "end": "2025-09-12T22:00:00Z",
-                            "genres": ["Nature", "Wildlife"],
+                            "genres": [
+                                "Nature",
+                                "Wildlife"
+                            ],
                             "rating": "8.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1356,7 +1732,10 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "Uncovering the mysteries of the deep ocean.",
                             "start": "2025-09-12T22:00:00Z",
                             "end": "2025-09-12T23:00:00Z",
-                            "genres": ["Marine", "Science"],
+                            "genres": [
+                                "Marine",
+                                "Science"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         },
@@ -1366,19 +1745,24 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                             "description": "The science and predictions of future large earthquakes.",
                             "start": "2025-09-12T23:00:00Z",
                             "end": "2025-09-13T00:00:00Z",
-                            "genres": ["Science", "Disaster"],
+                            "genres": [
+                                "Science",
+                                "Disaster"
+                            ],
                             "rating": "7.5",
                             "thumbnail": "https://placehold.co/600x400"
                         }
                     ]
-                }                  
+                }
             ]
         }
     });
 })
+  
+  
 
 // Start server
-app.listen(port, () => {
-    console.log(`✅ Mock API is running at: http://localhost:${port}/api/v1/config`);
+app.listen(port, async () => {
+    await createUserTable();
+    console.log(`🚀 API server running: http://localhost:${port}`);
 });
-
