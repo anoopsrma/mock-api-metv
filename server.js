@@ -209,7 +209,7 @@ app.get('/api/v1/config', (req, res) => {
         data: {
             terms_and_conditions: "/api/v1/terms-and-conditions",
             privacy_policy: "/api/v1/privacy-policy",
-            logo: "https://placehold.co/600x400",
+            logo: "https://picsum.photos/600/400",
             forgot_password: {
                 label: "Forgot Password",
                 route: "/api/v1/password/forgot",
@@ -314,7 +314,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                             "title": "The Flash",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.2",
                             "release_year": 2023,
                             "is_live": true,
@@ -342,7 +342,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_001",
@@ -355,7 +355,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Reality"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_002",
@@ -368,7 +368,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Engineering"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_003",
@@ -381,7 +381,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Rescue"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_004",
@@ -394,7 +394,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Industry"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_005",
@@ -407,7 +407,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_006",
@@ -420,7 +420,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Drama"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_007",
@@ -433,7 +433,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_008",
@@ -446,7 +446,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Education"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_009",
@@ -459,7 +459,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Space"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_010",
@@ -472,7 +472,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Reality"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_011",
@@ -485,7 +485,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Action"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_012",
@@ -498,7 +498,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Marine"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_013",
@@ -511,7 +511,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Archaeology"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_014",
@@ -524,7 +524,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Technology"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_015",
@@ -537,7 +537,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Travel"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_016",
@@ -550,7 +550,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "War"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_017",
@@ -563,7 +563,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_018",
@@ -576,7 +576,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Space"
                             ],
                             "rating": "TV-PG",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_019",
@@ -589,7 +589,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_020",
@@ -602,7 +602,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_021",
@@ -615,7 +615,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Wildlife"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_022",
@@ -628,7 +628,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_023",
@@ -641,7 +641,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Disaster"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         }
                     ]
                 },
@@ -652,7 +652,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428888-122b-11e1-b85c-61cd3cbb3210",
                             "title": "The Flash",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.2",
                             "release_year": 2023,
                             "is_live": false,
@@ -666,7 +666,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428889-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Avatar: The Way of Water",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.7",
                             "release_year": 2022,
                             "is_live": false,
@@ -680,7 +680,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428890-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Barbie",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "7.8",
                             "release_year": 2023,
                             "is_live": false,
@@ -694,7 +694,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428891-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Oppenheimer",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9.1",
                             "release_year": 2023,
                             "is_live": false,
@@ -708,7 +708,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428892-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Guardians of the Galaxy Vol. 3",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8",
                             "release_year": 2023,
                             "is_live": false,
@@ -728,7 +728,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428893-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Dune: Part Two",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2024,
                             "is_live": false,
@@ -742,7 +742,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428894-122b-11e1-b85c-61cd3cbb3210",
                             "title": "John Wick: Chapter 4",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.3",
                             "release_year": 2023,
                             "is_live": false,
@@ -756,7 +756,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428895-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Spider-Man: Across the Spider-Verse",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9",
                             "release_year": 2023,
                             "is_live": false,
@@ -770,7 +770,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428896-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Mission: Impossible – Dead Reckoning",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.4",
                             "release_year": 2023,
                             "is_live": false,
@@ -784,7 +784,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428897-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Indiana Jones and the Dial of Destiny",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "7.9",
                             "release_year": 2023,
                             "is_live": false,
@@ -804,7 +804,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428898-122b-11e1-b85c-61cd3cbb3210",
                             "title": "The Shawshank Redemption",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9.3",
                             "release_year": 1994,
                             "is_live": false,
@@ -817,7 +817,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d9428899-122b-11e1-b85c-61cd3cbb3210",
                             "title": "The Godfather",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9.2",
                             "release_year": 1972,
                             "is_live": false,
@@ -831,7 +831,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a0-122b-11e1-b85c-61cd3cbb3210",
                             "title": "The Dark Knight",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9",
                             "release_year": 2008,
                             "is_live": false,
@@ -845,7 +845,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a1-122b-11e1-b85c-61cd3cbb3210",
                             "title": "12 Angry Men",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "9",
                             "release_year": 1957,
                             "is_live": false,
@@ -858,7 +858,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a2-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Schindler's List",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.9",
                             "release_year": 1993,
                             "is_live": false,
@@ -878,7 +878,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a3-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Inception",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.8",
                             "release_year": 2010,
                             "is_live": false,
@@ -892,7 +892,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a4-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Parasite",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.6",
                             "release_year": 2019,
                             "is_live": false,
@@ -906,7 +906,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a5-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Interstellar",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.6",
                             "release_year": 2014,
                             "is_live": false,
@@ -920,7 +920,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a6-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Whiplash",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2014,
                             "is_live": false,
@@ -934,7 +934,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a7-122b-11e1-b85c-61cd3cbb3210",
                             "title": "The Prestige",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2006,
                             "is_live": false,
@@ -954,7 +954,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a8-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Action",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2006,
                             "is_live": false,
@@ -965,7 +965,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288a9-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Comedy",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2006,
                             "is_live": false,
@@ -976,7 +976,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288aa-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Drama",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2006,
                             "is_live": false,
@@ -987,7 +987,7 @@ app.get('/api/v1/home', (req, res) => {
                         {
                             "id": "d94288ab-122b-11e1-b85c-61cd3cbb3210",
                             "title": "Horror",
-                            "poster": "https://placehold.co/600x400",
+                            "poster": "https://picsum.photos/600/400",
                             "rating": "8.5",
                             "release_year": 2006,
                             "is_live": false,
@@ -1030,7 +1030,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 {
                     "id": "d9428888-122b-11e1-b85c-61cd3cbb3210",
                     "title": "The Flash",
-                    "poster": "https://placehold.co/600x400",
+                    "poster": "https://picsum.photos/600/400",
                     "rating": "8.2",
                     "release_year": 2023,
                     "is_live": false,
@@ -1044,7 +1044,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 {
                     "id": "d9428889-122b-11e1-b85c-61cd3cbb3210",
                     "title": "Avatar: The Way of Water",
-                    "poster": "https://placehold.co/600x400",
+                    "poster": "https://picsum.photos/600/400",
                     "rating": "8.7",
                     "release_year": 2022,
                     "is_live": false,
@@ -1058,7 +1058,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 {
                     "id": "d9428890-122b-11e1-b85c-61cd3cbb3210",
                     "title": "Barbie",
-                    "poster": "https://placehold.co/600x400",
+                    "poster": "https://picsum.photos/600/400",
                     "rating": "7.8",
                     "release_year": 2023,
                     "is_live": false,
@@ -1072,7 +1072,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 {
                     "id": "d9428891-122b-11e1-b85c-61cd3cbb3210",
                     "title": "Oppenheimer",
-                    "poster": "https://placehold.co/600x400",
+                    "poster": "https://picsum.photos/600/400",
                     "rating": "9.1",
                     "release_year": 2023,
                     "is_live": false,
@@ -1086,7 +1086,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 {
                     "id": "d9428892-122b-11e1-b85c-61cd3cbb3210",
                     "title": "Guardians of the Galaxy Vol. 3",
-                    "poster": "https://placehold.co/600x400",
+                    "poster": "https://picsum.photos/600/400",
                     "rating": "8",
                     "release_year": 2023,
                     "is_live": false,
@@ -1114,7 +1114,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                         "id": "channel_101",
                         "name": "National Geographic",
                         "number": "101",
-                        "logo": "https://placehold.co/600x400"
+                        "logo": "https://picsum.photos/600/400"
                     },
                     "epg": [
                         {
@@ -1128,7 +1128,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_001",
@@ -1141,7 +1141,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Reality"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_002",
@@ -1154,7 +1154,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Engineering"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_003",
@@ -1167,7 +1167,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Rescue"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_004",
@@ -1180,7 +1180,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Industry"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_005",
@@ -1193,7 +1193,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_006",
@@ -1206,7 +1206,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Drama"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_007",
@@ -1219,7 +1219,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_008",
@@ -1232,7 +1232,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Education"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_009",
@@ -1245,7 +1245,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Space"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_010",
@@ -1258,7 +1258,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Reality"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_011",
@@ -1271,7 +1271,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Action"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_012",
@@ -1284,7 +1284,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Marine"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_013",
@@ -1297,7 +1297,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Archaeology"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_014",
@@ -1310,7 +1310,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Technology"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_015",
@@ -1323,7 +1323,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Travel"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_016",
@@ -1336,7 +1336,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "War"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_017",
@@ -1349,7 +1349,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_018",
@@ -1362,7 +1362,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Space"
                             ],
                             "rating": "TV-PG",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_019",
@@ -1375,7 +1375,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_020",
@@ -1388,7 +1388,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_021",
@@ -1401,7 +1401,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Wildlife"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_022",
@@ -1414,7 +1414,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_023",
@@ -1427,7 +1427,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Disaster"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         }
                     ]
                 },
@@ -1437,7 +1437,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                         "id": "channel_101",
                         "name": "National Geographic",
                         "number": "101",
-                        "logo": "https://placehold.co/600x400"
+                        "logo": "https://picsum.photos/600/400"
                     },
                     "epg": [
                         {
@@ -1451,7 +1451,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_001",
@@ -1464,7 +1464,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Reality"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_002",
@@ -1477,7 +1477,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Engineering"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_003",
@@ -1490,7 +1490,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Rescue"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_004",
@@ -1503,7 +1503,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Industry"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_005",
@@ -1516,7 +1516,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_006",
@@ -1529,7 +1529,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Drama"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_007",
@@ -1542,7 +1542,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_008",
@@ -1555,7 +1555,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Education"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_009",
@@ -1568,7 +1568,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Space"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_010",
@@ -1581,7 +1581,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Reality"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_011",
@@ -1594,7 +1594,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Action"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_012",
@@ -1607,7 +1607,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Marine"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_013",
@@ -1620,7 +1620,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Archaeology"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_014",
@@ -1633,7 +1633,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Technology"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_015",
@@ -1646,7 +1646,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Travel"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_016",
@@ -1659,7 +1659,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "War"
                             ],
                             "rating": "PG-13",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_017",
@@ -1672,7 +1672,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "TV-14",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_018",
@@ -1685,7 +1685,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Space"
                             ],
                             "rating": "TV-PG",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_019",
@@ -1698,7 +1698,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_020",
@@ -1711,7 +1711,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_021",
@@ -1724,7 +1724,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Wildlife"
                             ],
                             "rating": "8.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_022",
@@ -1737,7 +1737,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Science"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
                             "id": "epg_023",
@@ -1750,7 +1750,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
                                 "Disaster"
                             ],
                             "rating": "7.5",
-                            "thumbnail": "https://placehold.co/600x400"
+                            "thumbnail": "https://picsum.photos/600/400"
                         }
                     ]
                 }
