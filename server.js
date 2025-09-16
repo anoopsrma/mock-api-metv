@@ -328,6 +328,27 @@ app.get('/api/v1/config', (req, res) => {
                     },
                 ]
             },
+            email_verify: {
+                label: "Email Verify",
+                route: "/api/v1/email/verify",
+                form: [
+                    {
+                        label: "Email", key: "username", data_type: "string"
+                    },
+                    {
+                        label: "Token", key: "token", data_type: "string"
+                    },
+                ]
+            },
+            version_check: {
+                label: "Version Check",
+                route: "/api/v1/version/check",
+                query: [
+                    {
+                        label: "Version", key: "version", data_type: "string"
+                    }
+                ]
+            },
             login: [
                 {
                     label: "Normal Login",
