@@ -109,7 +109,10 @@ app.post('/api/v1/login', upload.none(), async (req, res) => {
         return res.status(200).json({
             status: true,
             data: {
-                "access_token": token
+                "access_token": token,
+                "name": "Lorem Ipsum",
+                "email": "lorem@ipsum.com",
+                "phone": "1234567890"
             }
         });
 
@@ -196,6 +199,60 @@ app.post('/api/v1/password/reset', upload.none(), async (req, res) => {
         });
     } catch (err) {
         console.error('❌ Reset password error:', err.message);
+        res.status(500).json({
+            status: false,
+            error: 'Internal server error',
+        });
+    }
+});
+
+app.post('/api/v1/password/change', upload.none(), async (req, res) => {
+    const { old_password, new_password } = req.body;
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            status: false,
+            message: 'Unauthorized: Bearer token missing or malformed'
+        });
+    }
+
+    try {
+        const result = await db.execute({
+            sql: `SELECT * FROM users WHERE username = ?`,
+            args: [username],
+        });
+
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                error: 'User not found!',
+            });
+        }
+
+        const isMatch = await bcrypt.compare(old_password, user.password);
+        if (!isMatch) {
+            res.status(200).json({
+                status: true,
+                message: 'Invalid password,',
+            });
+        } 
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        // Update password and clear token
+        await db.execute({
+            sql: `UPDATE users SET password = ?, token = NULL WHERE username = ?`,
+            args: [hashedPassword, username],
+        });
+
+        res.status(200).json({
+            status: true,
+            message: 'Password has been reset successfully',
+        });
+    } catch (err) {
+        console.error('❌ change password error:', err.message);
         res.status(500).json({
             status: false,
             error: 'Internal server error',
@@ -1005,8 +1062,7 @@ app.get('/api/v1/home', (req, res) => {
 
 // Stream
 app.get('/api/v1/movies/:channelId/stream', (req, res) => {
-    const authHeader = req.headers['authorization'
-    ];
+    const authHeader = req.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({
