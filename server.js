@@ -399,6 +399,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -412,6 +413,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Reality"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -425,6 +427,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Engineering"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -438,6 +441,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Rescue"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -451,6 +455,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Industry"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -464,6 +469,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "PG-13",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -477,6 +483,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Drama"
                             ],
                             "rating": "TV-14",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -490,6 +497,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -503,6 +511,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Education"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -516,6 +525,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Space"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -529,6 +539,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Reality"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -542,6 +553,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Action"
                             ],
                             "rating": "TV-14",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -555,6 +567,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Marine"
                             ],
                             "rating": "7.5",
+                            "is_live": true,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -568,6 +581,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Archaeology"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -581,6 +595,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Technology"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -594,6 +609,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Travel"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -607,6 +623,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "War"
                             ],
                             "rating": "PG-13",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -620,6 +637,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "TV-14",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -633,6 +651,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Space"
                             ],
                             "rating": "TV-PG",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -646,6 +665,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Documentary"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -659,6 +679,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -672,6 +693,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Wildlife"
                             ],
                             "rating": "8.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -685,6 +707,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science"
                             ],
                             "rating": "7.5",
+                            "is_live": false,
                             "thumbnail": "https://picsum.photos/600/400"
                         },
                         {
@@ -697,6 +720,7 @@ app.get('/api/v1/home', (req, res) => {
                                 "Science",
                                 "Disaster"
                             ],
+                            "is_live": false,
                             "rating": "7.5",
                             "thumbnail": "https://picsum.photos/600/400"
                         }
