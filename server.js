@@ -1841,6 +1841,7 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
 
 app.get('/api/v1/version/check', (req, res) => {
     const clientVersion = req.query.version || '0.0.0';
+    const is_maintanence = req.query.is_maintanence || false;
     const latestVersion = '1.0.1';
     const forceUpdateVersion = '1.0.0';
     const update = isVersionLessThan(clientVersion, latestVersion);
@@ -1849,7 +1850,8 @@ app.get('/api/v1/version/check', (req, res) => {
         status: true,
         data: {
             update: update,
-            force_update: forceUpdate,
+            update_type: forceUpdate ? 'force' : 'normal',
+            is_maintanence: is_maintanence,
             message: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries"
         }
     });
