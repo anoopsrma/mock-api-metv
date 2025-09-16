@@ -206,6 +206,43 @@ app.post('/api/v1/password/reset', upload.none(), async (req, res) => {
     }
 });
 
+app.post('/api/v1/email/verify', upload.none(), async (req, res) => {
+    const { username, token} = req.body;
+
+    try {
+        const result = await db.execute({
+            sql: `SELECT * FROM users WHERE username = ?`,
+            args: [username],
+        });
+
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                error: 'User not found!',
+            });
+        }
+        console.log(token)
+        if (!user.token || token !== "123456") {
+            return res.status(422).json({
+                status: false,
+                error: 'Invalid or expired token',
+            });
+        }
+
+        res.status(200).json({
+            status: true,
+            message: 'Email has been verified successfully',
+        });
+    } catch (err) {
+        console.error('❌ Email verify error:', err.message);
+        res.status(500).json({
+            status: false,
+            error: 'Internal server error',
+        });
+    }
+});
+
 app.post('/api/v1/password/change', upload.none(), async (req, res) => {
     const { old_password, new_password } = req.body;
     const authHeader = req.headers['authorization'];
