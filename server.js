@@ -1814,6 +1814,15 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
         }
     });
 })
+
+app.get('/api/v1/version/check', (req, res) => {
+    res.json({
+        status: true,
+        data: {
+            update: true
+        }
+    });
+})
   
   
 
