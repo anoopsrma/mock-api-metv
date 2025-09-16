@@ -1840,13 +1840,28 @@ app.get('/api/v1/epgs/:channelId', async (req, res) => {
 })
 
 app.get('/api/v1/version/check', (req, res) => {
+    const clientVersion = req.query.version || '0.0.0';
+    const latestVersion = '1.0.0';
+    const update = isVersionLessThan(clientVersion, latestVersion);
     res.json({
         status: true,
         data: {
-            update: true
+            update: update
         }
     });
-})
+});
+
+// Simple version comparison function
+function isVersionLessThan(v1, v2) {
+    const v1Parts = v1.split('.').map(Number);
+    const v2Parts = v2.split('.').map(Number);
+
+    for (let i = 0; i < 3; i++) {
+        if ((v1Parts[i] || 0) < (v2Parts[i] || 0)) return true;
+        if ((v1Parts[i] || 0) > (v2Parts[i] || 0)) return false;
+    }
+    return false; // versions are equal
+}
   
   
 
