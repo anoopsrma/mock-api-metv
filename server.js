@@ -1105,7 +1105,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 "Comedy"
             ],
             "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "url": "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist_dvr.m3u8",
             "next_program": [
                 {
                     "id": "d9428888-122b-11e1-b85c-61cd3cbb3210",
