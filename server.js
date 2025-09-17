@@ -97,7 +97,7 @@ app.post('/api/v1/login', upload.none(), async (req, res) => {
         const token = jwt.sign(
             { id: user.id, username: user.username },
             JWT_SECRET,
-            { expiresIn: '2h' }
+            { expiresIn: '1d' }
         );
 
         // Store token in DB (optional)
@@ -121,6 +121,50 @@ app.post('/api/v1/login', upload.none(), async (req, res) => {
         return res.status(500).json({ status: false, error: 'Server error' });
     }
 });
+
+app.post('/api/v1/refresh', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')){
+        return res.status(401).json({ status: false, error: 'Missing or invalid token' });
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return res.status(200).json({ status: true, data: { access_token: token } });
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            try {
+                const decoded = jwt.decode(token, { complete: true });
+                const exp = decoded.payload.exp;
+                const now = Math.floor(Date.now() / 1000);
+                const secondsSinceExpired = now - exp;
+                if (secondsSinceExpired > 86400) {
+                    return res.status(401).json({ status: false, error: 'Token expired more than 1 day ago' });
+                }
+                // Create a new access token
+                const newAccessToken = jwt.sign(
+                    {
+                        id: decoded.payload.id,
+                        username: decoded.payload.username
+                    },
+                    JWT_SECRET,
+                    { expiresIn: '1d' }
+                );
+                return res.status(200).json({
+                    status: true,
+                    data: {
+                        access_token: newAccessToken
+                    }
+                });
+            } catch (decodeErr) {
+                return res.status(400).json({ status: false, error: 'Invalid token structure' });
+            }
+        }
+
+        return res.status(400).json({ status: false, error: 'Invalid token' });
+    }
+});
+
 
 // Forgot Password
 app.post('/api/v1/password/forgot', upload.none(), async (req, res) => {
