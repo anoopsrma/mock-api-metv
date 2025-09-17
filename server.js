@@ -349,8 +349,8 @@ app.get('/api/v1/config', (req, res) => {
     res.json({
         status: true,
         data: {
-            terms_and_conditions: "/api/v1/terms-and-conditions",
-            privacy_policy: "/api/v1/privacy-policy",
+            terms_and_conditions: "/api/v1/policy/terms",
+            privacy_policy: "/api/v1/policy/privacy",
             logo: "https://picsum.photos/600/400",
             forgot_password: {
                 label: "Forgot Password",
@@ -481,14 +481,6 @@ app.get('/api/v1/config', (req, res) => {
                 key: "search",
                 route: "/api/v1/search",
             },
-            privacy: {
-                label: "Privacy",
-                route: "/api/v1/policy/privacy",
-            },
-            terms_and_conditions: {
-                label: "Terms",
-                route: "/api/v1/policy/terms",
-            }
         }
     });
 });
