@@ -124,7 +124,7 @@ app.post('/api/v1/login', upload.none(), async (req, res) => {
 
 app.post('/api/v1/refresh', async (req, res) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')){
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ status: false, error: 'Missing or invalid token' });
     }
     const token = authHeader.split(' ')[1];
@@ -251,7 +251,7 @@ app.post('/api/v1/password/reset', upload.none(), async (req, res) => {
 });
 
 app.post('/api/v1/email/verify', upload.none(), async (req, res) => {
-    const { username, token} = req.body;
+    const { username, token } = req.body;
 
     try {
         const result = await db.execute({
@@ -317,7 +317,7 @@ app.post('/api/v1/password/change', upload.none(), async (req, res) => {
                 status: true,
                 message: 'Invalid password,',
             });
-        } 
+        }
 
         // Hash new password
         const hashedPassword = await bcrypt.hash(new_password, 10);
@@ -1279,13 +1279,23 @@ app.get('/api/v1/search', (req, res) => {
 
 // Stream
 app.get('/api/v1/movies/:channelId/stream', (req, res) => {
-    const authHeader = req.headers['authorization'];
+    // const authHeader = req.headers['authorization'];
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-            status: false,
-            message: 'Unauthorized: Bearer token missing or malformed'
-        });
+    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    //     return res.status(401).json({
+    //         status: false,
+    //         message: 'Unauthorized: Bearer token missing or malformed'
+    //     });
+    // }
+    const channelId = req.params.channelId;
+    live_url = ''
+    dvr_url = ''
+    if (channelId != "f47ac10b-58cc-4372-a567-0e02b2c3d479") {
+        live_url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+        dvr_url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+    } else {
+        live_url = "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist.m3u8"
+        dvr_url = "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist_dvr.m3u8"
     }
 
     res.json({
@@ -1297,8 +1307,8 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                 "Comedy"
             ],
             "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-            "live_url": "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist.m3u8",
-            "dvr_url": "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist_dvr.m3u8",
+            "live_url": live_url,
+            "dvr_url": dvr_url,
             "next_program": [
                 {
                     "id": "d9428888-122b-11e1-b85c-61cd3cbb3210",
@@ -1307,7 +1317,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "rating": "8.2",
                     "release_year": 2023,
                     "is_live": false,
-                    "route": "api/v1/movies/d9428888-122b-11e1-b85c-61cd3cbb3210",
+                    "route": "api/v1/movies/d9428888-122b-11e1-b85c-61cd3cbb3210/stream",
                     "genres": [
                         "Action",
                         "Adventure"
@@ -1321,7 +1331,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "rating": "8.7",
                     "release_year": 2022,
                     "is_live": false,
-                    "route": "api/v1/movies/d9428889-122b-11e1-b85c-61cd3cbb3210",
+                    "route": "api/v1/movies/d9428889-122b-11e1-b85c-61cd3cbb3210/stream",
                     "genres": [
                         "Action",
                         "Sci-Fi"
@@ -1335,7 +1345,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "rating": "7.8",
                     "release_year": 2023,
                     "is_live": false,
-                    "route": "api/v1/movies/d9428890-122b-11e1-b85c-61cd3cbb3210",
+                    "route": "api/v1/movies/d9428890-122b-11e1-b85c-61cd3cbb3210/stream",
                     "genres": [
                         "Comedy",
                         "Adventure"
@@ -1349,7 +1359,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "rating": "9.1",
                     "release_year": 2023,
                     "is_live": false,
-                    "route": "api/v1/movies/d9428891-122b-11e1-b85c-61cd3cbb3210",
+                    "route": "api/v1/movies/d9428891-122b-11e1-b85c-61cd3cbb3210/stream",
                     "genres": [
                         "Drama",
                         "History"
@@ -1363,7 +1373,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
                     "rating": "8",
                     "release_year": 2023,
                     "is_live": false,
-                    "route": "api/v1/movies/d9428892-122b-11e1-b85c-61cd3cbb3210",
+                    "route": "api/v1/movies/d9428892-122b-11e1-b85c-61cd3cbb3210/stream",
                     "genres": [
                         "Action",
                         "Sci-Fi"
@@ -1409,8 +1419,8 @@ app.get('/api/v1/policy/terms', (req, res) => {
         }
     })
 })
-  
-  
+
+
 
 // Start server
 app.listen(port, async () => {
