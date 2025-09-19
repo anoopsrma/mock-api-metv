@@ -1296,8 +1296,8 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
         live_url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
         dvr_url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
     } else {
-        live_url = "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist.m3u8"
-        dvr_url = "https://ntvedge.truestreamz.com/ntvlive/ntvithari-abr.stream/playlist_dvr.m3u8"
+        live_url = "https://np.truestreamz.com/live/wodmetv.stream/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9OS8xOS8yMDI1IDg6MDU6MTUgQU0maGFzaF92YWx1ZT0rekZBeHUvR1UvVnFSZGhXcW5XSHdRPT0mdmFsaWRtaW51dGVzPTYwMCZpZD02NDEx"
+        dvr_url = "https://np.truestreamz.com/live/wodmetv.stream/playlist_dvr.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9OS8xOS8yMDI1IDg6MDU6MTUgQU0maGFzaF92YWx1ZT0rekZBeHUvR1UvVnFSZGhXcW5XSHdRPT0mdmFsaWRtaW51dGVzPTYwMCZpZD02NDEx"
     }
 
     res.json({
