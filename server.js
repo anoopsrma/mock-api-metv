@@ -1390,7 +1390,7 @@ app.get('/api/v1/movies/:channelId/stream', (req, res) => {
 app.get('/api/v1/version/check', (req, res) => {
     const clientVersion = req.query.version_code || 0;
     const is_maintanence = req.query.is_maintanence || false;
-    const latestVersion = 2;
+    const latestVersion = 1;
     const forceUpdateVersion = 1;
     const forceUpdate = clientVersion < forceUpdateVersion;
     res.json({
